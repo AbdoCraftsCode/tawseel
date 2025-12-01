@@ -16,7 +16,7 @@ export const bootstap = (app , express) => {
     app.use(cors());
     app.use(express.json())
     connectDB();
-    app.use("/auth", authcontroller)
+    app.use("/Auth", authcontroller)
     // app.use("/category", categorycontroller)
     app.use("/user", usercontroller)
     // app.use("/company", companycontroller)

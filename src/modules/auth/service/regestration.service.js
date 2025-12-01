@@ -158,10 +158,13 @@ export async function sendOTP(phone, method = "whatsapp") {
 // });
 
 
-export const signup = asyncHandelr(async (req, res, next) => {
-    const { fullName, password, email, phone } = req.body;
+export const register = asyncHandelr(async (req, res, next) => {
+    const { fullName, password, email, phoneNumber, confirmPassword } = req.body;
 
-    // ✅ تحقق من وجود واحد من الاتنين فقط
+    // 🟢 إعادة تسمية phoneNumber → phone
+    const phone = phoneNumber;
+
+    // ✅ لازم يدخل واحد فقط (إيميل أو هاتف)
     if (!email && !phone) {
         return next(new Error("يجب إدخال البريد الإلكتروني أو رقم الهاتف", { cause: 400 }));
     }
@@ -177,15 +180,15 @@ export const signup = asyncHandelr(async (req, res, next) => {
         }
     });
 
-    // ✅ لو المستخدم موجود بالفعل
     if (checkuser) {
-        // 👇 الشرط الجديد:
-        if (checkuser.accountType === "ServiceProvider" &&
-            (checkuser.serviceType === "Delivery" || checkuser.serviceType === "Driver")) {
-            // 🟢 مسموح يكمل تسجيل كمستخدم عادي
-            console.log("✅ نفس الإيميل/الهاتف موجود لمقدم خدمة Delivery أو Driver — السماح بالتسجيل كمستخدم عادي.");
+        // 🟢 لو حساب قديم ServiceProvider من نوع Delivery or Driver — مسموح يسجل User عادي
+        if (
+            checkuser.accountType === "ServiceProvider" &&
+            (checkuser.serviceType === "Delivery" || checkuser.serviceType === "Driver")
+        ) {
+            console.log("✅ نفس الإيميل/الهاتف موجود لمقدم خدمة — السماح بالتسجيل كمستخدم عادي.");
         } else {
-            // ❌ لو مش مقدم خدمة — ممنوع التسجيل
+            // ❌ لو بيانات مستخدم عادي
             if (checkuser.email === email) {
                 return next(new Error("البريد الإلكتروني مستخدم من قبل", { cause: 400 }));
             }
@@ -195,10 +198,10 @@ export const signup = asyncHandelr(async (req, res, next) => {
         }
     }
 
-    // ✅ تشفير كلمة المرور
+    // 🔐 تشفير كلمة المرور
     const hashpassword = await generatehash({ planText: password });
 
-    // ✅ إنشاء المستخدم
+    // 🟢 إنشاء المستخدم
     const user = await dbservice.create({
         model: Usermodel,
         data: {
@@ -206,17 +209,24 @@ export const signup = asyncHandelr(async (req, res, next) => {
             password: hashpassword,
             email,
             phone,
-            accountType: 'User',  // 👈 تحديد إنه مستخدم عادي
+            accountType: 'User',
         }
     });
 
-    // ✅ إرسال OTP
+    // 🟧 إرسال OTP فقط للهاتف
     try {
         if (phone) {
+
+            // 🟡 إرسال OTP للهاتف فقط
             await sendOTP(phone);
+
             console.log(`📩 OTP تم إرساله إلى الهاتف: ${phone}`);
         }
+
         else if (email) {
+
+            // 🚫 تعطيل إرسال OTP للإيميل بدون حذف الكود — فقط تعليق
+            /*
             const otp = customAlphabet("0123456789", 4)();
             const html = vervicaionemailtemplet({ code: otp });
 
@@ -236,6 +246,7 @@ export const signup = asyncHandelr(async (req, res, next) => {
             });
 
             console.log(`📩 OTP تم إرساله إلى البريد: ${email}`);
+            */
         }
 
     } catch (error) {
@@ -243,7 +254,10 @@ export const signup = asyncHandelr(async (req, res, next) => {
         return next(new Error("فشل في إرسال رمز التحقق", { cause: 500 }));
     }
 
-    return successresponse(res, "تم إنشاء الحساب بنجاح، وتم إرسال رمز التحقق", 201);
+    return res.status(201).json({
+        success: true,
+        message: "تم إنشاء الحساب بنجاح، وتم إرسال رمز التحقق عبر الهاتف"
+    });
 });
 
 
