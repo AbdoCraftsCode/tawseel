@@ -262,10 +262,104 @@ export const register = asyncHandelr(async (req, res, next) => {
 
 
 
+export const createCategory = asyncHandelr(async (req, res, next) => {
+    console.log(req.file);
+
+    // رفع الصورة على Cloudinary
+    const { secure_url, public_id } = await cloud.uploader.upload(
+        req.file.path,
+        { folder: `categories/${req.user._id}` }
+    );
+
+    // إنشاء الكاتيجوري
+    const category = await CategoryModel.create({
+        name: req.body.name,      // ✨ بدّلناها لقيمة واحدة فقط
+        image: { secure_url, public_id },
+        updatedBy: req.user._id
+    });
+
+    return res.status(201).json({
+        success: true,
+        message: "Category created successfully!"
+    });
+});
 
 
 
+export const getAllCategories = asyncHandelr(async (req, res, next) => {
 
+    const categories = await CategoryModel.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+        success: true,
+        count: categories.length,
+        categories
+    });
+});
+
+
+
+export const createMeal = asyncHandelr(async (req, res, next) => {
+    const { category, name, description, sizes } = req.body;
+
+    if (!req.file) {
+        return next(new Error("❌ الصورة مطلوبة", { cause: 400 }));
+    }
+
+    // رفع الصورة
+    const { secure_url, public_id } = await cloud.uploader.upload(
+        req.file.path,
+        { folder: `meals/${req.user._id}` }
+    );
+
+    // تحويل الأحجام من JSON إلى Array
+    let parsedSizes = [];
+    if (sizes) {
+        try {
+            parsedSizes = JSON.parse(sizes);
+        } catch (err) {
+            return next(new Error("❌ صيغة sizes غير صحيحة — يجب أن تكون JSON", { cause: 400 }));
+        }
+    }
+
+    const meal = await MealModel.create({
+        category,
+        name,
+        description,
+        sizes: parsedSizes,
+        image: { secure_url, public_id },
+        createdBy: req.user._id
+    });
+
+    return res.status(201).json({
+        success: true,
+        message: "Meal created successfully!",
+        data: meal
+    });
+});
+
+
+export const getMealsByCategory = asyncHandelr(async (req, res, next) => {
+    const { categoryId } = req.params;
+
+    // التأكد إن الصنف موجود
+    const category = await CategoryModel.findById(categoryId);
+    if (!category) {
+        return next(new Error("Category not found", { cause: 404 }));
+    }
+
+    // جلب الوجبات الخاصة بالصنف
+    const meals = await MealModel.find({ category: categoryId })
+        .populate("category", "name image")
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+        success: true,
+        category: category.name,
+        count: meals.length,
+        meals
+    });
+});
 
 
 
@@ -7263,6 +7357,8 @@ import { ImageModel } from "../../../DB/models/imageSchema.model.js";
 import { ReportModel } from "../../../DB/models/reportSchema.js";
 import { verifyOTP } from "./authontecation.service.js";
 import AppSettingsSchema from "../../../DB/models/AppSettingsSchema.js";
+import { CategoryModel } from "../../../DB/models/Category.model.js";
+import { MealModel } from "../../../DB/models/mealSchema.js";
 
 export const updateSubscription = asyncHandelr(async (req, res, next) => {
     const { userId } = req.params;

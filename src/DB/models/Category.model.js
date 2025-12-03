@@ -1,16 +1,15 @@
-
-
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema(
     {
         name: {
-            en: { type: String, required: true, trim: true },
-            ar: { type: String, required: true, trim: true }
+            type: String,
+            required: true,
+            trim: true
         },
         image: {
-            secure_url: { type: String, required: true }, // الصورة مطلوبة
-            public_id: { type: String, required: true }   // مهم لحذف الصور من Cloudinary
+            secure_url: { type: String, required: true },
+            public_id: { type: String, required: true }
         },
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -22,4 +21,3 @@ const categorySchema = new mongoose.Schema(
 );
 
 export const CategoryModel = mongoose.model("Category", categorySchema);
-
