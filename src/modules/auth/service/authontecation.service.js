@@ -242,7 +242,6 @@ const AUTHENTICA_OTP_URL = "https://api.authentica.sa/api/v1/send-otp";
 
 
 
-
 export const login = asyncHandelr(async (req, res, next) => {
     const { phone } = req.body;
 
@@ -260,12 +259,32 @@ export const login = asyncHandelr(async (req, res, next) => {
     }
 
     try {
-        // إرسال OTP كل مرة
+        // إرسال OTP
         await sendOTP(phone);
         console.log(`📩 OTP تم إرساله إلى: ${phone}`);
 
-        return successresponse(res, "تم إرسال رمز التحقق", 200, {
-            status: "otp_sent"
+        // توليد JWT مؤقت أو dummy إذا مطلوب
+        const dataJWT = "0QAAAB+LCAAAAAAAAAoVzVsPgiAYgOF/1DCD1qVhh48JHjLEblqRM2ilrTWFX5/dvhfP2zh2v+60SQ2Do4dAGPjAq8CaAoFHryRlq1njmNRz6YoKo4sqMNjOKMoyuY3aqX9vdP28htDyeDPwGJzwOhSeafhjT2xOBggv9VyUMHLLnTgM5qTuw+SMwtcBt4+FmOYJZX2tcpPaTSjs0fESPLdyNdtX54AktW+237SNS5Kgdz7qDyIoivpu7KqdzDC4ZYbyH8vgj8fRAAAA";
+
+        return res.status(200).json({
+            output: {
+                Data: `OTP sent for ${phone}`,
+                DataJWT: dataJWT,
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
         });
 
     } catch (error) {

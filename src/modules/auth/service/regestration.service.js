@@ -262,40 +262,411 @@ export const register = asyncHandelr(async (req, res, next) => {
 
 
 
-export const createCategory = asyncHandelr(async (req, res, next) => {
-    console.log(req.file);
 
-    // رفع الصورة على Cloudinary
+export const createCategory = asyncHandelr(async (req, res, next) => {
+    const {
+        name,
+        nameAr,
+        description,
+        descriptionAr
+    } = req.body;
+
+    if (!req.file) {
+        return next(new Error("❌ الصورة مطلوبة", { cause: 400 }));
+    }
+
+    // رفع الصورة
     const { secure_url, public_id } = await cloud.uploader.upload(
         req.file.path,
         { folder: `categories/${req.user._id}` }
     );
 
-    // إنشاء الكاتيجوري
     const category = await CategoryModel.create({
-        name: req.body.name,      // ✨ بدّلناها لقيمة واحدة فقط
+        name,
+        nameAr,
+        description,
+        descriptionAr,
         image: { secure_url, public_id },
-        updatedBy: req.user._id
+        createdBy: req.user._id
     });
 
     return res.status(201).json({
-        success: true,
-        message: "Category created successfully!"
+        header: {
+            success: true,
+            code: 200,
+            message: "تم تنفيذ العملية بنجاح",
+            messageEn: "The operation was performed successfully",
+            hasArabicContent: true,
+            hasEnglishContent: true,
+            transType: "success"
+        },
+        output: {
+            Data: category,
+            Count: 1
+        }
     });
 });
 
 
+export const createItem = async (req, res, next) => {
 
-export const getAllCategories = asyncHandelr(async (req, res, next) => {
+    console.log(req.file);
+    try {
+        const {
+            name,
+            nameAr,
+            description,
+            descriptionAr,
+            price,
+            pre_Price,
+            status,
+            isPointsOptionActive,
+            taxValue,
+            taxId,
+            note,
+            itemType,
+            isFeatured,
+            isPopularActive,
+            categoryId,
+            branchIds,
+            itemExtras,
+            attributes,
+            itemAddons
+        } = req.body;
 
-    const categories = await CategoryModel.find().sort({ createdAt: -1 });
+        // ❌ لازم يرفع صورة
+        if (!req.file) {
+            return next(new Error("❌ الصورة مطلوبة", { cause: 400 }));
+        }
+
+        // ✔ رفع الصورة
+        const upload = await cloud.uploader.upload(req.file.path, {
+            folder: `items/${req.user._id}`
+        });
+
+        const item = await ItemModel.create({
+            name,
+            nameAr,
+            description,
+            descriptionAr,
+            price,
+            pre_Price,
+            status,
+            isPointsOptionActive,
+            taxValue,
+            taxId,
+            note,
+            itemType,
+            isFeatured,
+            isPopularActive,
+            categoryId,
+
+            imageUrl: upload.secure_url,
+
+            branchIds: branchIds ? JSON.parse(branchIds) : [],
+            itemExtras: itemExtras ? JSON.parse(itemExtras) : [],
+            attributes: attributes ? JSON.parse(attributes) : [],
+            itemAddons: itemAddons ? JSON.parse(itemAddons) : [],
+
+            createdBy: req.user._id
+        });
+
+        return res.status(201).json({
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "success"
+            },
+            output: {
+                Data: item,
+                Count: 1
+            }
+        });
+
+    } catch (error) {
+        return next(new Error(error.message, { cause: 500 }));
+    }
+};
+
+
+
+// GET all items or by categoryId or search etc... (حسب احتياجك)
+export const getItems = async (req, res, next) => {
+    try {
+        const { categoryId, branchId, search } = req.query;
+
+        // بناء الـ query
+        let query = { status: { $ne: 0 } }; // عشان متجيبش المحذوفين لو عندك soft delete
+
+        if (categoryId) {
+            query.categoryId = categoryId;
+        }
+        if (branchId) {
+            query.branchIds = branchId;
+        }
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { nameAr: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const items = await ItemModel.find(query)
+            .populate({
+                path: "categoryId",
+                select: "name nameAr",
+            })
+            .populate({
+                path: "branchIds",
+                select: "_id", // بس عشان نرجع الأيديهات بس
+            })
+            .populate({
+                path: "itemExtras",
+                select: "itemExtraId name nameAr status additionalPrice",
+                transform: (doc) => {
+                    if (!doc) return doc;
+                    return {
+                        id: doc._id,
+                        itemExtraId: doc.itemExtraId,
+                        name: doc.name,
+                        nameAr: doc.nameAr,
+                        status: doc.status,
+                        additionalPrice: doc.additionalPrice,
+                    };
+                },
+            })
+            .populate({
+                path: "attributes",
+                populate: {
+                    path: "variations",
+                    select: "-_id itemVariationId name nameAr note noteAr additionalPrice attributeId attributeName attributeNameAr",
+                },
+                transform: (attr) => {
+                    if (!attr) return attr;
+                    return {
+                        id: attr._id,
+                        name: attr.name,
+                        nameAr: attr.nameAr,
+                        variations: attr.variations.map((v) => ({
+                            id: v._id,
+                            itemVariationId: v.itemVariationId,
+                            name: v.name,
+                            nameAr: v.nameAr,
+                            note: v.note,
+                            noteAr: v.noteAr,
+                            additionalPrice: v.additionalPrice,
+                            attributeId: v.attributeId,
+                            attributeName: v.attributeName,
+                            attributeNameAr: v.attributeNameAr,
+                        })),
+                    };
+                },
+            })
+            .populate({
+                path: "itemAddons",
+                select: "addonId addonName addonNameAr additionalPrice imageUrl",
+                transform: (addon) => {
+                    if (!addon) return addon;
+                    return {
+                        addonId: addon.addonId,
+                        addonName: addon.addonName,
+                        addonNameAr: addon.addonNameAr,
+                        additionalPrice: addon.additionalPrice,
+                        imageUrl: addon.imageUrl || null,
+                    };
+                },
+            })
+            .lean(); // مهم جداً عشان نقدر نعدل على الداتا بعد كده
+
+        // تحويل البيانات للشكل المطلوب بالضبط
+        const formattedItems = items.map((item) => ({
+            id: item._id,
+            name: item.name,
+            nameAr: item.nameAr || null,
+            description: item.description || null,
+            descriptionAr: item.descriptionAr || null,
+            price: item.price,
+            pre_Price: item.pre_Price || null,
+            imageUrl: item.imageUrl,
+            status: item.status,
+            isPointsOptionActive: item.isPointsOptionActive,
+            taxValue: item.taxValue || null,
+            taxId: item.taxId || null,
+            note: item.note || null,
+            itemType: item.itemType || 1,
+            isFeatured: item.isFeatured,
+            isPopularActive: item.isPopularActive,
+
+            // Category
+            categoryId: item.categoryId?._id || item.categoryId,
+            categoryName: item.categoryId?.name || null,
+            categoryNameAr: item.categoryId?.nameAr || null,
+
+            // الحقول الإضافية اللي ممكن تحتاج تحسبها
+            offerId: null, // لو عندك offers هتحسبها هنا
+            isItemHasValidPopularDiscount: null,
+            isAvilable: null, // ممكن تحسبها بناءً على branch أو stock
+
+            branchIds: item.branchIds?.map((b) => b._id || b) || [],
+
+            itemExtras: item.itemExtras || [],
+            attributes: item.attributes || [],
+            itemAddons: item.itemAddons || [],
+        }));
+
+        return res.status(200).json({
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "success",
+            },
+            output: {
+                Data: formattedItems,
+                DataJWT: "", // لو عايز تضيفه بعدين
+                Count: formattedItems.length,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        return next(new Error("حدث خطأ أثناء جلب المنتجات", { cause: 500 }));
+    }
+};
+
+
+
+
+
+export const createExtra = async (req, res, next) => {
+    try {
+        const { itemExtraId, name, nameAr, status, additionalPrice } = req.body;
+
+        const extra = await ExtraModel.create({
+            itemExtraId,
+            name,
+            nameAr,
+            status,
+            additionalPrice
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Extra created successfully",
+            data: extra
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const createAddon = async (req, res, next) => {
+    try {
+        const {
+            addonId,
+            addonName,
+            addonNameAr,
+            additionalPrice,
+            imageUrl
+        } = req.body;
+
+        const addon = await AddonModel.create({
+            addonId,
+            addonName,
+            addonNameAr,
+            additionalPrice,
+            imageUrl
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Addon created successfully",
+            data: addon
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+export const createAttribute = async (req, res, next) => {
+    try {
+        const { id, name, nameAr, variations } = req.body;
+
+        const attribute = await AttributeModel.create({
+            id,
+            name,
+            nameAr,
+            variations
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Attribute created successfully",
+            data: attribute
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+export const getAllCategories = asyncHandelr(async (req, res) => {
+    const categories = await CategoryModel.find().lean();
+
+    const Data = categories.map(cat => ({
+        id: cat._id,
+        name: cat.name,
+        nameAr: cat.nameAr,
+        description: cat.description,
+        descriptionAr: cat.descriptionAr,
+        imageUrl: cat.image.secure_url,
+        status: cat.status,
+        isMaterialCategory: cat.isMaterialCategory,
+        items: cat.items
+    }));
 
     return res.status(200).json({
-        success: true,
-        count: categories.length,
-        categories
+        header: {
+            success: true,
+            code: 200,
+            message: "تم تنفيذ العملية بنجاح",
+            messageEn: "The operation was performed successfully",
+            hasArabicContent: true,
+            hasEnglishContent: true,
+            transType: "success"
+        },
+        output: {
+            Data,
+            Count: Data.length
+        }
     });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -337,6 +708,13 @@ export const createMeal = asyncHandelr(async (req, res, next) => {
         data: meal
     });
 });
+
+
+
+
+
+
+
 
 
 export const getMealsByCategory = asyncHandelr(async (req, res, next) => {
@@ -3864,35 +4242,99 @@ export const registerRestaurant = asyncHandelr(async (req, res, next) => {
     return successresponse(res, allData, 201);
 });
   
-export const createBranch = asyncHandelr(async (req, res, next) => {
+export const createBranch = asyncHandelr(async (req, res) => {
     const {
-        branchCode,
-        branchName,
-        country,
-        city,
-        phone,
-        address,
-        manager
+        name, longitude, latitude, email, phone,
+        city, state, zipCode, address,
+        minDeliveryTime, minPickupTime, rafeeqRefId
     } = req.body;
 
-    const userId = req.user.id; // لو عندك حماية بالتوكن
-
-    const branch = await BranchModel.create({
-        restaurant: userId,
-        branchCode,
-        branchName,
-        country,
-        city,
+    const branch = await BranchModell.create({
+        name,
+        longitude,
+        latitude,
+        email,
         phone,
+        city,
+        state,
+        zipCode,
         address,
-        manager
+        minDeliveryTime,
+        minPickupTime,
+        rafeeqRefId,
+        createdBy: req.user._id
     });
 
-    return successresponse(res, {
-        message: 'Branch created successfully',
-        branch
-    }, 201);
+    return res.status(201).json({
+        header: {
+            success: true,
+            code: 200,
+            message: "تم تنفيذ العملية بنجاح",
+            messageEn: "The operation was performed successfully",
+            hasArabicContent: true,
+            hasEnglishContent: true,
+            transType: "success"
+        },
+        output: {
+            Data: branch,
+            Count: 1
+        }
+    });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+export const getAllBranches = asyncHandelr(async (req, res) => {
+    const branches = await BranchModell.find().lean();
+
+    const Data = branches.map(b => ({
+        id: b.id,
+        name: b.name,
+        longitude: b.longitude,
+        latitude: b.latitude,
+        email: b.email,
+        phone: b.phone,
+        city: b.city,
+        state: b.state,
+        zipCode: b.zipCode,
+        address: b.address,
+        status: b.status,
+        minDeliveryTime: b.minDeliveryTime,
+        minPickupTime: b.minPickupTime,
+        rafeeqRefId: b.rafeeqRefId
+    }));
+
+    return res.status(200).json({
+        output: {
+            Data,
+            DataJWT: req.user?.token || null, // حط أي JWT عايزه هنا
+            Count: Data.length
+        },
+        header: {
+            success: true,
+            code: 200,
+            message: "تم تنفيذ العملية بنجاح",
+            messageEn: "The operation was performed successfully",
+            hasArabicContent: true,
+            hasEnglishContent: true,
+            customMessage: null,
+            customMessageEn: null,
+            transType: "success",
+            duration: null,
+            errors: null
+        }
+    });
+});
+
 
 export const getBranches = asyncHandelr(async (req, res, next) => {
     const userId = req.user.id; // لو عامل حماية بالتوكن
@@ -7359,6 +7801,11 @@ import { verifyOTP } from "./authontecation.service.js";
 import AppSettingsSchema from "../../../DB/models/AppSettingsSchema.js";
 import { CategoryModel } from "../../../DB/models/Category.model.js";
 import { MealModel } from "../../../DB/models/mealSchema.js";
+import { BranchModell } from "../../../DB/models/BranchSchemaaa.js";
+import { ItemModel } from "../../../DB/models/ItemSchema.js";
+import { ExtraModel } from "../../../DB/models/ExtraSchema.js";
+import { AddonModel } from "../../../DB/models/AddonSchema.js";
+import { AttributeModel } from "../../../DB/models/VariationSchema.js";
 
 export const updateSubscription = asyncHandelr(async (req, res, next) => {
     const { userId } = req.params;
