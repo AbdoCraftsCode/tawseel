@@ -263,6 +263,223 @@ export const register = asyncHandelr(async (req, res, next) => {
 
 
 
+export const getAccountInfo = async (req, res) => {
+    try {
+        // 📌 جلب userId إما من التوكن أو من query
+        const userId = req.user?._id || req.query.userId;
+
+        if (!userId) {
+            return res.status(400).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "يجب إرسال userId",
+                    messageEn: "userId is required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "error",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        const user = await Usermodel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 404,
+                    message: "المستخدم غير موجود",
+                    messageEn: "User not found",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "error",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 🟨 إنشاء JWT باستخدام نظامك الأساسي generatetoken
+        const token = generatetoken({
+            payload: { id: user._id },
+            expiresIn: "7d"
+        });
+
+        // 🟢 تجهيز شكل الداتا EXACT
+        const profileData = {
+            email: user.email || null,
+            fullName: user.fullName || null,
+            phoneNumber: user.phone || null,
+            profilePhoto: user.profilePhoto || null,
+            gender: user.gender ?? 0,
+            isAvailable: user.isAvailable ?? true
+        };
+
+        return res.status(200).json({
+            output: {
+                Data: profileData,
+                DataJWT: token,
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ GetAccountInfo Error:", error);
+
+        return res.status(500).json({
+            output: null,
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "error",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
+
+export const updateAccountInfo = async (req, res) => {
+    try {
+        const userId = req.user?._id;
+
+        if (!userId) {
+            return res.status(400).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "userId مفقود",
+                    messageEn: "userId is required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "error",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        const { fullName, email, phoneNumber, gender } = req.body;
+
+        const user = await Usermodel.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 404,
+                    message: "المستخدم غير موجود",
+                    messageEn: "User not found",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "error",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // تحديث البيانات
+        if (fullName !== undefined) user.fullName = fullName;
+        if (email !== undefined) user.email = email;
+        if (phoneNumber !== undefined) user.phone = phoneNumber;
+        if (gender !== undefined) user.gender = gender;
+
+        await user.save();
+
+        // 🔐 إنشاء JWT جديد بنفس نظامك generatetoken
+        const newToken = generatetoken({
+            payload: { id: user._id },
+            expiresIn: "7d"
+        });
+
+        const profileData = {
+            email: user.email || null,
+            fullName: user.fullName || null,
+            phoneNumber: user.phone || null,
+            gender: user.gender ?? 0
+        };
+
+        return res.status(200).json({
+            output: {
+                Data: profileData,
+                DataJWT: newToken,
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ updateAccountInfo Error:", error);
+
+        return res.status(500).json({
+            output: null,
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "error",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
+
+
+
 export const createCategory = asyncHandelr(async (req, res, next) => {
     const {
         name,
@@ -306,6 +523,426 @@ export const createCategory = asyncHandelr(async (req, res, next) => {
         }
     });
 });
+
+
+export const AddAddressToUser = async (req, res) => {
+    try {
+        const {
+            userId,
+            buildingName,
+            street,
+            apartmentNumber,
+            additionalDirection,
+            phoneNumber,
+            floor,
+            addressLabel,
+            addressType
+        } = req.body;
+
+        // التحقق من وجود userId
+        if (!userId) {
+            return res.status(400).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "userId مطلوب",
+                    messageEn: "userId is required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 🔍 التأكد من أن المستخدم موجود
+        const user = await Usermodel.findById(userId);
+        if (!user) {
+            return res.status(200).json({
+                output: {
+                    Data: [],
+                    DataJWT: "FAKE_JWT_TOKEN_123456789",
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 200,
+                    message: "اسم المستخدم المدخل غير موجود",
+                    messageEn: "The username entered does not exist",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 📌 إنشاء العنوان
+        const address = await Address.create({
+            userId,
+            buildingName,
+            street,
+            apartmentNumber,
+            additionalDirection,
+            phoneNumber,
+            floor,
+            addressLabel,
+            addressType
+        });
+
+        // 🎯 توليد توكن نفس اللي في confirmPhoneOtp
+        const access_Token = generatetoken({ payload: { id: user._id } });
+
+        return res.status(200).json({
+            output: {
+                Data: [address],
+                DataJWT: access_Token,
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم إضافة العنوان بنجاح",
+                messageEn: "Address added successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ AddAddressToUser Error:", error);
+
+        return res.status(500).json({
+            output: {
+                Data: [],
+                DataJWT: "FAKE_JWT_TOKEN_123456789",
+                Count: 0
+            },
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "danger",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
+export const GetUserAddress = async (req, res) => {
+    try {
+        const { AddressId, UserId } = req.query;
+
+        // ❗ التحقق من وجود بارامترات
+        if (!AddressId && !UserId) {
+            return res.status(400).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "يجب إرسال AddressId أو UserId",
+                    messageEn: "AddressId or UserId is required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        let addresses;
+
+        // 1️⃣ لو AddressId موجود → رجّع العنوان المحدد
+        if (AddressId) {
+            addresses = await Address.find({ _id: AddressId });
+
+            if (addresses.length === 0) {
+                return res.status(200).json({
+                    output: {
+                        Data: [],
+                        DataJWT: null,
+                        Count: 0
+                    },
+                    header: {
+                        success: false,
+                        code: 200,
+                        message: "العنوان غير موجود",
+                        messageEn: "Address not found",
+                        hasArabicContent: true,
+                        hasEnglishContent: true,
+                        customMessage: null,
+                        customMessageEn: null,
+                        transType: "danger",
+                        duration: null,
+                        errors: null
+                    }
+                });
+            }
+        }
+
+        // 2️⃣ لو UserId موجود → رجّع عناوين المستخدم
+        else if (UserId) {
+            // تأكد المستخدم موجود
+            const user = await Usermodel.findById(UserId);
+            if (!user) {
+                return res.status(200).json({
+                    output: {
+                        Data: [],
+                        DataJWT: null,
+                        Count: 0
+                    },
+                    header: {
+                        success: false,
+                        code: 200,
+                        message: "اسم المستخدم المدخل غير موجود",
+                        messageEn: "The username entered does not exist",
+                        hasArabicContent: true,
+                        hasEnglishContent: true,
+                        customMessage: null,
+                        customMessageEn: null,
+                        transType: "danger",
+                        duration: null,
+                        errors: null
+                    }
+                });
+            }
+
+            addresses = await Address.find({ userId: UserId });
+        }
+
+        // 📌 Response النهائي
+        return res.status(200).json({
+            output: {
+                Data: addresses,
+                DataJWT: "FAKE_JWT_TOKEN_123456", // 🔥 بناءً على طلبك
+                Count: addresses.length
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم جلب البيانات بنجاح",
+                messageEn: "Data fetched successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ GetUserAddress Error:", error);
+
+        return res.status(500).json({
+            output: {
+                Data: [],
+                DataJWT: null,
+                Count: 0
+            },
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "danger",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
+
+export const UpdateUserAddress = async (req, res) => {
+    try {
+        const {
+            id,
+            userId,
+            buildingName,
+            street,
+            apartmentNumber,
+            additionalDirection,
+            phoneNumber,
+            floor,
+            addressLabel,
+            addressType
+        } = req.body;
+
+        // 1️⃣ التحقق من الـ id و userId
+        if (!id || !userId) {
+            return res.status(400).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "يجب إرسال id و userId",
+                    messageEn: "id and userId are required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 2️⃣ التأكد من أن المستخدم موجود
+        const user = await Usermodel.findById(userId);
+
+        if (!user) {
+            return res.status(200).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 200,
+                    message: "اسم المستخدم المدخل غير موجود",
+                    messageEn: "The username entered does not exist",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 3️⃣ التأكد من أن العنوان موجود
+        const address = await Address.findById(id);
+
+        if (!address) {
+            return res.status(200).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 200,
+                    message: "العنوان غير موجود",
+                    messageEn: "Address not found",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        // 4️⃣ التحديث
+        const updatedAddress = await Address.findByIdAndUpdate(
+            id,
+            {
+                buildingName,
+                street,
+                apartmentNumber,
+                additionalDirection,
+                phoneNumber,
+                floor,
+                addressLabel,
+                addressType
+            },
+            { new: true } // رجع البيانات بعد التحديث
+        );
+
+        // 5️⃣ Response النهائي
+        return res.status(200).json({
+            output: {
+                Data: [updatedAddress],
+                DataJWT: "FAKE_JWT_654987", // ✔ بناءً على طلبك نرجع توكن وهمي
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تحديث العنوان بنجاح",
+                messageEn: "Address updated successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ UpdateUserAddress Error:", error);
+
+        return res.status(500).json({
+            output: {
+                Data: [],
+                DataJWT: null,
+                Count: 0
+            },
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "danger",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
 
 
 export const createItem = async (req, res, next) => {
@@ -541,6 +1178,63 @@ export const getItems = async (req, res, next) => {
 };
 
 
+export const getCategoriesWithItemsByBranch = asyncHandelr(async (req, res, next) => {
+    const { branchId } = req.params;
+
+    if (!branchId) {
+        return next(new Error("branchId مطلوب", { cause: 400 }));
+    }
+
+    try {
+        // 1) هات كل الكاتيجوريز
+        const categories = await CategoryModel.find({ status: 1 }).lean();
+
+        // 2) هات كل المنتجات اللي تحتوي على هذا البرانش
+        const items = await ItemModel.find({
+            branchIds: branchId,
+            status: 1
+        }).lean();
+
+        // 3) اجمع المنتجات داخل كل كاتيجوري
+        const result = categories.map(cat => {
+            const catItems = items.filter(item => String(item.categoryId) === String(cat._id));
+
+            return {
+                ...cat,
+                items: catItems
+            };
+        });
+
+        // 4) لو عايز token زي المثال (عملتلك واحد تجريبي Base64)
+        const fakeJWT = Buffer.from(JSON.stringify({ branchId })).toString("base64");
+
+        // 5) ريسبونس النهائي بنفس الشكل EXACT
+        return res.status(200).json({
+            output: {
+                Data: result,
+                DataJWT: fakeJWT,
+                Count: result.length
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        return next(new Error("خطأ في جلب البيانات", { cause: 500 }));
+    }
+});
 
 
 
@@ -657,15 +1351,388 @@ export const getAllCategories = asyncHandelr(async (req, res) => {
 
 
 
+export const createFAQ = async (req, res) => {
+    try {
+        const { id, question, answer } = req.body;
+
+        if (!id || !question || !answer) {
+            return res.status(400).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "جميع الحقول مطلوبة",
+                    messageEn: "All fields are required",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
+        }
+
+        const faq = await FAQModel.create({ id, question, answer });
+
+        return res.status(200).json({
+            output: {
+                Data: [faq],
+                DataJWT: "dummy_token_123",
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم إنشاء السؤال بنجاح",
+                messageEn: "FAQ created successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            output: {
+                Data: [],
+                DataJWT: null,
+                Count: 0
+            },
+            header: {
+                success: false,
+                code: 500,
+                message: "خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "danger",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
+
+
+export const getAllFAQs = async (req, res) => {
+    try {
+        const faqs = await FAQModel.find().sort({ id: 1 });
+
+        return res.status(200).json({
+            output: {
+                Data: faqs,
+                DataJWT: "ZAYAAB+LCA...==", // ضيف أي توكن ثابت
+                Count: faqs.length
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            output: {
+                Data: [],
+                DataJWT: null,
+                Count: 0
+            },
+            header: {
+                success: false,
+                code: 500,
+                message: "خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "danger",
+                duration: null,
+                errors: error.message
+            }
+        });
+    }
+};
 
 
 
 
 
 
+export const CreateCustomerOrder = async (req, res) => {
+    try {
+        const userId = req.user.id; // موجود من الميدل وير
+
+        const {
+            orderType,
+            paymentMethod,
+            paymentStatus,
+            branchId,
+            address,
+            longitude,
+            latitude,
+            numberOfPersons,
+            dateTime,
+            carType,
+            carNumber,
+            carColor,
+            phoneNumber
+        } = req.body;
+
+        // التحقق من الحقول الأساسية
+        if (!orderType || !paymentMethod || !paymentStatus || !branchId ||
+            !address || longitude == null || latitude == null || !dateTime || !phoneNumber) {
+
+            return res.status(400).json({
+                header: {
+                    success: false,
+                    code: 0,
+                    message: `Requested value '${orderType || paymentMethod || paymentStatus || address || "string"}' was not found.`,
+                    messageEn: `Requested value '${orderType || paymentMethod || paymentStatus || address || "string"}' was not found.`,
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    transType: "danger",
+                    errors: null
+                },
+                output: null
+            });
+        }
+
+        // إنشاء الطلب مع إضافة createdBy من req.user
+        const newOrder = await OrderModelll.create({
+            orderType,
+            paymentMethod,
+            paymentStatus,
+            branchId,
+            address,
+            longitude,
+            latitude,
+            numberOfPersons,
+            dateTime,
+            carType,
+            carNumber,
+            carColor,
+            phoneNumber,
+            createdBy: userId
+        });
+
+        return res.status(200).json({
+            header: {
+                success: true,
+                code: 200,
+                message: "تم إنشاء الطلب بنجاح",
+                messageEn: "Order created successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "success",
+                errors: null
+            },
+            output: {
+                orderId: newOrder._id, // هنا ترجع الـ _id
+                order: newOrder
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ CreateCustomerOrder Error:", error);
+        return res.status(500).json({
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "danger",
+                errors: error.message
+            },
+            output: null
+        });
+    }
+};
 
 
+// GET Customer Order by ID (with authentication)
+export const GetCustomerOrder = async (req, res) => {
+    try {
+        const userId = req.user.id; // موجود من الميدل وير
+        const { orderId } = req.query;
 
+        if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "orderId غير صالح أو مفقود",
+                    messageEn: "Invalid or missing orderId",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    transType: "danger",
+                    errors: null
+                }
+            });
+        }
+
+        // جلب الطلب فقط إذا كان من نفس المستخدم
+        const order = await OrderModelll.findOne({ _id: orderId, createdBy: userId })
+            .populate("branchId")
+            .lean();
+
+        if (!order) {
+            return res.status(200).json({
+                output: {
+                    Data: [],
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 200,
+                    message: "اسم المستخدم المدخل غير موجود",
+                    messageEn: "The username entered does not exist",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    transType: "danger",
+                    errors: null
+                }
+            });
+        }
+
+        // Customer data من التوكن
+        const customer = {
+            id: userId,
+            name: req.user.name || "User",
+            phone: order.phoneNumber,
+            email: req.user.email || ""
+        };
+
+        // Dummy order items (مثل السابق)
+        const orderItems = [
+            {
+                id: 134,
+                itemId: 127,
+                name: "Iced Caramel Latte",
+                description: "Description for Drinks Item 2",
+                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748163160/drev6muucutsh1tp9rrw.jpg",
+                quantity: 1,
+                price: 10,
+                totalPrice: 20,
+                notes: "",
+                selectedVariations: [
+                    {
+                        id: 128,
+                        variationName: "Medium Size",
+                        attributename: "size",
+                        additionalPrice: 10
+                    }
+                ],
+                selectedAddons: [],
+                selectedExtras: []
+            }
+        ];
+
+        const responseData = {
+            id: order._id,
+            status: "Returned",
+            orderType: order.orderType,
+            paymentMethod: order.paymentMethod,
+            paymentStatus: order.paymentStatus,
+            branchId: order.branchId?.id || null,
+            branchName: order.branchId?.name || "",
+            address: order.address,
+            longitude: order.longitude,
+            latitude: order.latitude,
+            numberOfPersons: order.numberOfPersons,
+            dateTime: order.dateTime,
+            carType: order.carType || "",
+            carNumber: order.carNumber || "",
+            carColor: order.carColor || "",
+            phoneNumber: order.phoneNumber,
+            customerId: customer.id,
+            customerName: customer.name,
+            customerPhone: customer.phone,
+            customerEmail: customer.email,
+            createdBy: customer.name,
+            updatedBy: "ibrahem",
+            dateCreated: new Date().toLocaleString(),
+            dateUpdated: new Date().toLocaleString(),
+            discount: 0,
+            totalAmount: 10,
+            note: "Deliver to front door, no contact preferred",
+            orderItems,
+            orderItemsCount: orderItems.length,
+            discountType: "",
+            subTotal: 10,
+            deliveryBoyId: null,
+            deliveryBoyName: "",
+            deliveryPartnerId: null,
+            deliveryPartnerName: "",
+            deliveryPartnerPrice: 0,
+            externalOrderNO: null,
+            discountCode: null,
+            totalTaxes: null,
+            totalCharges: null,
+            totalDiscount: null,
+            pickup_Datetime: null,
+            delivery_Datetime: null,
+            orderScheduled: null
+        };
+
+        return res.status(200).json({
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "success",
+                errors: null
+            },
+            output: {
+                Data: responseData
+            }
+        });
+
+    } catch (error) {
+        console.error("❌ GetCustomerOrder Error:", error);
+        return res.status(500).json({
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ في السيرفر",
+                messageEn: "Server error",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                transType: "danger",
+                errors: error.message
+            },
+            output: null
+        });
+    }
+};
 
 
 
@@ -7806,6 +8873,9 @@ import { ItemModel } from "../../../DB/models/ItemSchema.js";
 import { ExtraModel } from "../../../DB/models/ExtraSchema.js";
 import { AddonModel } from "../../../DB/models/AddonSchema.js";
 import { AttributeModel } from "../../../DB/models/VariationSchema.js";
+import { Address } from "../../../DB/models/addressSchema.js";
+import { FAQModel } from "../../../DB/models/FAQSchema.js";
+import { OrderModelll } from "../../../DB/models/orderSchemaaaaa.js";
 
 export const updateSubscription = asyncHandelr(async (req, res, next) => {
     const { userId } = req.params;
