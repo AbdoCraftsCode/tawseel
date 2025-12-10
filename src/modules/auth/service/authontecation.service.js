@@ -935,11 +935,12 @@ export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
                 expiresIn: "365d",
             });
 
-            return successresponse(res, "تم التحقق بنجاح", 200, {
-                access_Token,
-                refreshToken,
-             
+            return res.status(200).json({
+                output: {
+                    token: access_Token
+                }
             });
+
 
         } else {
             return next(new Error("كود التحقق غير صحيح", { cause: 400 }));
