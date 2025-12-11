@@ -2299,6 +2299,205 @@ export const PopularItems = async (req, res) => {
 };
 
 
+
+// controllers/itemController.js
+
+export const ItemsByBranchAndCategory = async (req, res) => {
+    try {
+        const { branchID, categoryID } = req.params;
+
+        // حتى لو الباراميترز غلط أو مش موجودة → هنرجع نفس الداتا
+        // مش هنعمل أي validation حقيقي لأنك عايز static response
+
+        return res.status(200).json(getStaticItemsByBranchAndCategoryResponse());
+
+    } catch (error) {
+        // حتى لو حصل ايرور في السيرفر → هنرجع نفس الداتا عشان الفرونت ما يقفش
+        return res.status(200).json(getStaticItemsByBranchAndCategoryResponse());
+    }
+};
+
+// الداتا الثابتة بالضبط زي ما إنت عايزها
+export const getStaticItemsByBranchAndCategoryResponse = () => ({
+    header: {
+        success: true,
+        code: 200,
+        message: "تم تنفيذ العملية بنجاح",
+        messageEn: "The operation was performed successfully",
+        hasArabicContent: true,
+        hasEnglishContent: true,
+        customMessage: null,
+        customMessageEn: null,
+        transType: "success",
+        duration: null,
+        errors: null
+    },
+    output: {
+        Data: [
+            {
+                id: 103,
+                name: "Italian spaghetti",
+                nameAr: null,
+                description: "descripttion",
+                descriptionAr: null,
+                price: 50,
+                pre_Price: 60,
+                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747823482/pm4xhauun7ehe61je1mn.jpg",
+                status: 1,
+                isPointsOptionActive: true,
+                taxValue: null,
+                taxId: null,
+                note: "4",
+                itemType: 1,
+                isFeatured: false,
+                isPopularActive: true,
+                categoryId: 7,
+                categoryName: "Pizzas",
+                categoryNameAr: "بيتزا",
+                offerId: null,
+                isItemHasValidPopularDiscount: null,
+                isAvilable: null,
+                branchIds: [4],
+                itemExtras: [
+                    { id: 4, itemExtraId: 32, name: "Vegan", nameAr: "نباتي", status: 1, additionalPrice: 0 },
+                    { id: 1, itemExtraId: 41, name: "Extra Cheese", nameAr: "جبن إضافي", status: 1, additionalPrice: 5 },
+                    { id: 2, itemExtraId: 58, name: "Spicy", nameAr: "حار", status: 1, additionalPrice: 1 },
+                    { id: 3, itemExtraId: 60, name: "Gluten-Free", nameAr: "خالي من الغلوتين", status: 1, additionalPrice: 0 }
+                ],
+                attributes: [],
+                itemAddons: [
+                    { addonId: 102, addonName: "Pasta", addonNameAr: null, additionalPrice: 47, imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1765286438/syqjcpfudqrxx0tqnpvn.jpg" },
+                    { addonId: 104, addonName: "BBQ Bacon Pasta", addonNameAr: null, additionalPrice: 50, imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg" }
+                ]
+            },
+            {
+                id: 109,
+                name: "Four Cheese Pizza",
+                nameAr: null,
+                description: "Description for Pizza Item 3",
+                descriptionAr: null,
+                price: 40,
+                pre_Price: 72.21,
+                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835769/ozqvljwztcznwfu04a8i.jpg",
+                status: 0,
+                isPointsOptionActive: true,
+                taxValue: null,
+                taxId: null,
+                note: "Note for Pizza Item 3",
+                itemType: 0,
+                isFeatured: true,
+                isPopularActive: false,
+                categoryId: 7,
+                categoryName: "Pizzas",
+                categoryNameAr: "بيتزا",
+                offerId: null,
+                isItemHasValidPopularDiscount: null,
+                isAvilable: null,
+                branchIds: [1],
+                itemExtras: [
+                    { id: 3, itemExtraId: 10, name: "Gluten-Free", nameAr: "خالي من الغلوتين", status: 1, additionalPrice: 5 }
+                ],
+                attributes: [
+                    {
+                        id: 1,
+                        name: "Size",
+                        nameAr: "الحجم",
+                        variations: [
+                            { id: 1, itemVariationId: 70, name: "Larg", nameAr: "كبير", note: null, noteAr: null, additionalPrice: 40, attributeId: 1, attributeName: "Size", attributeNameAr: "الحجم" },
+                            { id: 2, itemVariationId: 71, name: "Medium", nameAr: "متوسط", note: null, noteAr: null, additionalPrice: 40, attributeId: 1, attributeName: "Size", attributeNameAr: "الحجم" }
+                        ]
+                    }
+                ],
+                itemAddons: [
+                    { addonId: 144, addonName: "Egg & Cheese Croissant", addonNameAr: "وافل نوتيلا مع لوتس", additionalPrice: 25.42, imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164071/ewlkn5jsveimpk6jxyrt.jpg" }
+                ]
+            },
+            {
+                id: 110,
+                name: "Veggie Supreme ",
+                nameAr: null,
+                description: "Description for Pizza Item 4",
+                descriptionAr: null,
+                price: 10,
+                pre_Price: 60.68,
+                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835742/vyqfp3euie1j7r7hjsc7.jpg",
+                status: 0,
+                isPointsOptionActive: true,
+                taxValue: null,
+                taxId: null,
+                note: "Note for Pizza Item 4",
+                itemType: 1,
+                isFeatured: false,
+                isPopularActive: false,
+                categoryId: 7,
+                categoryName: "Pizzas",
+                categoryNameAr: "بيتزا",
+                offerId: null,
+                isItemHasValidPopularDiscount: null,
+                isAvilable: null,
+                branchIds: [1],
+                itemExtras: [
+                    { id: 4, itemExtraId: 11, name: "Vegan", nameAr: "نباتي", status: 1, additionalPrice: 5 }
+                ],
+                attributes: [
+                    {
+                        id: 4,
+                        name: "pieces",
+                        nameAr: "عدد القطع",
+                        variations: [
+                            {
+                                id: 12,
+                                itemVariationId: 11,
+                                name: "Large Size",
+                                nameAr: "حجم كبير",
+                                note: "No onion option variation",
+                                noteAr: null,
+                                additionalPrice: 10,
+                                attributeId: 4,
+                                attributeName: "pieces",
+                                attributeNameAr: "عدد القطع"
+                            }
+                        ]
+                    }
+                ],
+                itemAddons: [
+                    { addonId: 144, addonName: "Egg & Cheese Croissant", addonNameAr: "وافل نوتيلا مع لوتس", additionalPrice: 25.42, imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164071/ewlkn5jsveimpk6jxyrt.jpg" }
+                ]
+            },
+            {
+                id: 153,
+                name: "Test Item",
+                nameAr: null,
+                description: "description",
+                descriptionAr: null,
+                price: 150,
+                pre_Price: null,
+                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747845807/kjvdzaqgjmvj6jcbclkl.png",
+                status: 1,
+                isPointsOptionActive: false,
+                taxValue: null,
+                taxId: null,
+                note: "notes",
+                itemType: 1,
+                isFeatured: true,
+                isPopularActive: true,
+                categoryId: 7,
+                categoryName: "Pizzas",
+                categoryNameAr: "بيتزا",
+                offerId: null,
+                isItemHasValidPopularDiscount: null,
+                isAvilable: null,
+                branchIds: [1],
+                itemExtras: [],
+                attributes: [],
+                itemAddons: []
+            }
+        ],
+        DataJWT: "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",
+        Count: 64
+    }
+});
+
 export const CreateCustomerOrder = async (req, res) => {
     try {
         const userId = req.user.id; // موجود من الميدل وير
