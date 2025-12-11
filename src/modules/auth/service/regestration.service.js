@@ -1548,6 +1548,36 @@ export const getCategoriesWithItemsByBranch = asyncHandelr(async (req, res, next
 
 
 
+export const GetFlag = async (req, res) => {
+    try {
+        return res.status(200).json({
+            output: {
+                Data: 0,
+                DataJWT:
+                    "rQAAAB+LCAAAAAAAAAoNyt0OQzAYANA3Ej8rcyksfI12YVi5oxG+yjaybF09/ZzrMxo6D6nEK1Kod3A4whueJZEx+LCsoolpaI2GNtJtTHkndi9KAuqFLD7ig2CH4LNKurwqbJZMmhmNnZj1cX58bx1egcdUtOcxXVtR4FVdPK5qmyfRiSU8tFq5BWfMtuX2WmWli0zY+7hNy9cJFI0+uUnp4Ew9CTX7A+3B9BWtAAAA",
+                Count: 1
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error"
+        });
+    }
+};
 
 
 
