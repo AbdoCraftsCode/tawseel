@@ -2498,6 +2498,141 @@ export const getStaticItemsByBranchAndCategoryResponse = () => ({
     }
 });
 
+
+// controllers/orderController.js
+
+export const GetCustomerOrders = async (req, res) => {
+    try {
+        // حتى لو مفيش توثيق أو اليوزر مش موجود → هنرجع نفس الداتا (لأنك عايز static response)
+        return res.status(200).json(getStaticCustomerOrdersResponse());
+
+    } catch (error) {
+        // حتى لو السيرفر طفى أو فيه ايرور → هنرجع نفس الداتا عشان الفرونت ما يقفش أبدًا
+        return res.status(200).json(getStaticCustomerOrdersResponse());
+    }
+};
+
+// الريسبونس الثابت بالملي زي ما إنت عايزه بالضبط
+const getStaticCustomerOrdersResponse = () => ({
+    header: {
+        success: true,
+        code: 200,
+        message: "تم تنفيذ العملية بنجاح",
+        messageEn: "The operation was performed successfully",
+        hasArabicContent: true,
+        hasEnglishContent: true,
+        customMessage: null,
+        customMessageEn: null,
+        transType: "success",
+        duration: null,
+        errors: null
+    },
+    output: {
+        Data: [
+            {
+                id: 348,
+                status: "FoodReady",
+                orderType: "Partner",
+                paymentMethod: "CashOnDelivery",
+                paymentStatus: "UnPaid",
+                branchId: 1,
+                branchName: "Central Branch",
+                address: null,
+                longitude: null,
+                latitude: null,
+                numberOfPersons: null,
+                dateTime: "2025-12-11T00:00:00",
+                carType: null,
+                carNumber: null,
+                carColor: null,
+                phoneNumber: "126987456",
+                customerId: "3da27ad6-53cd-448b-aad6-3aeb29f5607a",
+                customerName: "omar",
+                customerPhone: "126987456",
+                customerEmail: "omar@gmail.com",
+                createdBy: "ibrahem",
+                updatedBy: "ibrahem",
+                dateCreated: "2025-12-11 03:34 AM",
+                dateUpdated: "12/11/2025 3:38:17 AM -08:00",
+                discount: 0,
+                totalAmount: 145,
+                note: "",
+                orderItems: [
+                    {
+                        id: 483,
+                        itemId: 104,
+                        name: "BBQ Bacon Pasta",
+                        description: "Description for Burgers Item 1",
+                        imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg",
+                        quantity: 2,
+                        price: 50,
+                        totalPrice: 125,
+                        notes: "",
+                        selectedVariations: [],
+                        selectedAddons: [
+                            {
+                                id: 163,
+                                addonName: "Double Patty Smash Steak",
+                                additionalPrice: 10
+                            }
+                        ],
+                        selectedExtras: [
+                            {
+                                id: 256,
+                                extraName: "Spicy",
+                                additionalPrice: 1,
+                                quantity: 5
+                            }
+                        ]
+                    },
+                    {
+                        id: 484,
+                        itemId: 156,
+                        name: "Pesto ",
+                        description: "fa",
+                        imageUrl: "bd97bcdf-10ce-4e60-a503-55878d4fff90_12-08-2025-10-21-38.jpg",
+                        quantity: 1,
+                        price: 20,
+                        totalPrice: 20,
+                        notes: "",
+                        selectedVariations: [],
+                        selectedAddons: [],
+                        selectedExtras: []
+                    }
+                ],
+                orderItemsCount: 2,
+                discountType: "Fixed",
+                subTotal: 145,
+                deliveryBoyId: null,
+                deliveryBoyName: "",
+                deliveryPartnerId: 6,
+                deliveryPartnerName: "",
+                deliveryPartnerPrice: 0,
+                externalOrderNO: null,
+                discountCode: null,
+                totalTaxes: null,
+                totalCharges: null,
+                totalDiscount: null,
+                pickup_Datetime: null,
+                delivery_Datetime: null,
+                orderScheduled: null
+            }
+        ],
+        Pagination: {
+            currentPageIndex: 0,
+            totalPagesCount: 6,
+            recordPerPage: 50,
+            totalItemsCount: 296
+        }
+    }
+});
+
+
+
+
+
+
+
 export const CreateCustomerOrder = async (req, res) => {
     try {
         const userId = req.user.id; // موجود من الميدل وير
