@@ -957,6 +957,113 @@ export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
 
 
 
+export const GetOfferById = async (req, res) => {
+    try {
+        const { offerId } = req.params;
+
+        // حتى لو الـ offerId غلط أو مش موجود → هنرجع نفس العرض الثابت (لأنك عايز static)
+        return res.status(200).json(getStaticSingleOfferResponse());
+
+    } catch (error) {
+        return res.status(200).json(getStaticSingleOfferResponse());
+    }
+};
+
+const getStaticSingleOfferResponse = () => ({
+    header: {
+        success: true,
+        code: 200,
+        message: "تم تنفيذ العملية بنجاح",
+        messageEn: "The operation was performed successfully",
+        hasArabicContent: true,
+        hasEnglishContent: true,
+        customMessage: null,
+        customMessageEn: null,
+        transType: "success",
+        duration: null,
+        errors: null
+    },
+    output: {
+        Data: {
+            id: 1,
+            price: 29.99,
+            quantity: 1,
+            name: "Family Meal Offer",
+            nameAr: "عرض الوجبة العائلية",
+            status: 1,
+            startDate: "2025-01-10",
+            endDate: "2025-02-10",
+            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg",
+            discountPercentage: 15.0,
+            discountType: 1,
+            description: "A full family meal including burgers, fries and drinks.",
+            descriptionAr: "وجبة عائلية كاملة تتضمن برجر، بطاطس ومشروبات.",
+            branchId: 12,
+            items: [
+                {
+                    itemId: 101,
+                    itemName: "Beef Burger",
+                    itemNameAr: "برجر لحم",
+                    quantity: 2,
+                    imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg",
+                    offerItemVatiations: [
+                        {
+                            variationId: 201,
+                            variationName: "Large",
+                            variationNameAr: "كبير",
+                            variationPrice: 5.0,
+                            quantity: 2
+                        },
+                        {
+                            variationId: 202,
+                            variationName: "Extra Cheese",
+                            variationNameAr: "جبنة إضافية",
+                            variationPrice: 2.0,
+                            quantity: 2
+                        }
+                    ]
+                },
+                {
+                    itemId: 102,
+                    itemName: "French Fries",
+                    itemNameAr: "بطاطس مقلية",
+                    quantity: 2,
+                    imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg",
+                    offerItemVatiations: []
+                },
+                {
+                    itemId: 103,
+                    itemName: "Soft Drink",
+                    itemNameAr: "مشروب غازي",
+                    quantity: 2,
+                    imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg",
+                    offerItemVatiations: [
+                        {
+                            variationId: 301,
+                            variationName: "Pepsi",
+                            variationNameAr: "بيبسي",
+                            
+              variationPrice: 0.0,
+                            quantity: 1
+                        },
+                        {
+                            variationId: 302,
+                            variationName: "7up",
+                            variationNameAr: "سفن أب",
+                            variationPrice: 0.0,
+                            quantity: 1
+                        }
+                    ]
+                } 
+            ]
+        },
+        DataJWT: null,
+        Count: 1
+    }
+});
+
+
+
 export const forgetPasswordphone = asyncHandelr(async (req, res, next) => {
     const { phone } = req.body;
     console.log(phone);

@@ -2740,6 +2740,14 @@ const getStaticOffersResponse = () => ({
 
 
 
+
+
+
+
+
+// controllers/offerController.js
+
+
 export const CreateCustomerOrder = async (req, res) => {
     try {
         const userId = req.user.id; // موجود من الميدل وير
