@@ -940,6 +940,121 @@ export const UpdateUserAddress = async (req, res) => {
 
 
 
+export const getCategoriesByBranchStatic = async (req, res) => {
+    try {
+        const { branchId } = req.params;
+        const { page = 1, pageSize = 10 } = req.query;
+
+        const staticResponse = {
+            output: {
+                Data: {
+                    Data: [
+                        {
+                            id: 5,
+                            name: "Pasta",
+                            nameAr: "باستا",
+                            description: "Juicy burgers made fresh.",
+                            descriptionAr: "أطباق الباستا الإيطالية الشهية",
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747823452/ypog9whrc7qausglcshz.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        },
+                        {
+                            id: 7,
+                            name: "Pizzas",
+                            nameAr: "بيتزا",
+                            description: "Hot and cheesy pizzas",
+                            descriptionAr: "بيتزا متنوعة بنكهات فريدة",
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747823626/j2pzvscxqylnzemji20z.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        },
+                        {
+                            id: 19,
+                            name: "Burgers",
+                            nameAr: "برغر",
+                            description: "Juicy burgers made fresh.",
+                            descriptionAr: "برغر لحم ودجاج بنكهات متعددة",
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835508/xe7v9f2uxcpslneu1gwt.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        },
+                        {
+                            id: 24,
+                            name: "Salads",
+                            nameAr: "سلطات",
+                            description: "Healthy and fresh salads",
+                            descriptionAr: "سلطات طازجة وصحية",
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748162148/ro5wmxxcw7gh59rai61y.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        },
+                        {
+                            id: 33,
+                            name: "Beef",
+                            nameAr: "لحم بقري",
+                            description: "beef",
+                            descriptionAr: "أطباق لحم بقري مميزة",
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748162233/pjmwvstssbjfg6tlnqlc.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        },
+                        {
+                            id: 57,
+                            name: "Sushi",
+                            nameAr: null,
+                            description: "11",
+                            descriptionAr: null,
+                            imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1758573184/bdk5xkscd5z7rolw4lpr.jpg",
+                            status: 1,
+                            isMaterialCategory: true,
+                            items: []
+                        }
+                    ],
+                    Count: 6,
+                    Pagination: {
+                        currentPageIndex: Number(page),
+                        totalPagesCount: 1,
+                        recordPerPage: Number(pageSize),
+                        totalItemsCount: 6
+                    }
+                },
+                DataJWT: "HQsAAB+LCAAAAAAAAA...",
+                Count: 6
+            },
+            header: {
+                success: true,
+                code: 200,
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
+                hasArabicContent: true,
+                hasEnglishContent: true,
+                customMessage: null,
+                customMessageEn: null,
+                transType: "success",
+                duration: null,
+                errors: null
+            }
+        };
+
+        return res.status(200).json(staticResponse);
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
+
+
+
+
 
 
 
