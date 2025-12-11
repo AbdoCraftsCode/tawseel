@@ -1581,6 +1581,242 @@ export const GetFlag = async (req, res) => {
 
 
 
+export const itemID = async (req, res) => {
+    try {
+
+        return res.status(200).json({
+            "output": {
+                "Data": {
+                    "id": 102,
+                    "name": "Pasta",
+                    "nameAr": null,
+                    "description": "descripttion",
+                    "descriptionAr": null,
+                    "price": 67,
+                    "pre_Price": 60,
+                    "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1765286438/syqjcpfudqrxx0tqnpvn.jpg",
+                    "status": 1,
+                    "isPointsOptionActive": true,
+                    "taxValue": null,
+                    "taxId": 1,
+                    "note": "4",
+                    "itemType": 1,
+                    "isFeatured": true,
+                    "isPopularActive": true,
+                    "categoryId": 5,
+                    "categoryName": "Pasta",
+                    "categoryNameAr": "باستا",
+                    "offerId": null,
+                    "isItemHasValidPopularDiscount": null,
+                    "isAvilable": null,
+                    "branchIds": [1, 3],
+                    "itemExtras": [
+                        {
+                            "id": 14,
+                            "itemExtraId": 49,
+                            "name": "Extra Meat",
+                            "nameAr": "لحم إضافي",
+                            "status": 1,
+                            "additionalPrice": 5555555
+                        },
+                        {
+                            "id": 47,
+                            "itemExtraId": 50,
+                            "name": "Sweet Potato Fries",
+                            "nameAr": "بطاطس حلوة مقلية",
+                            "status": 1,
+                            "additionalPrice": 7
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "id": 1,
+                            "name": "Size",
+                            "nameAr": "الحجم",
+                            "variations": [
+                                {
+                                    "id": 3,
+                                    "itemVariationId": 52,
+                                    "name": "Small",
+                                    "nameAr": "صغير",
+                                    "note": null,
+                                    "noteAr": null,
+                                    "additionalPrice": 50,
+                                    "attributeId": 1,
+                                    "attributeName": "Size",
+                                    "attributeNameAr": "الحجم"
+                                },
+                                {
+                                    "id": 1,
+                                    "itemVariationId": 56,
+                                    "name": "Larg",
+                                    "nameAr": "كبير",
+                                    "note": null,
+                                    "noteAr": null,
+                                    "additionalPrice": 60,
+                                    "attributeId": 1,
+                                    "attributeName": "Size",
+                                    "attributeNameAr": "الحجم"
+                                },
+                                {
+                                    "id": 2,
+                                    "itemVariationId": 60,
+                                    "name": "Medium",
+                                    "nameAr": "متوسط",
+                                    "note": null,
+                                    "noteAr": null,
+                                    "additionalPrice": 40,
+                                    "attributeId": 1,
+                                    "attributeName": "Size",
+                                    "attributeNameAr": "الحجم"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 3,
+                            "name": "filling",
+                            "nameAr": "الحشوة",
+                            "variations": [
+                                {
+                                    "id": 49,
+                                    "itemVariationId": 58,
+                                    "name": "new",
+                                    "nameAr": null,
+                                    "note": "",
+                                    "noteAr": null,
+                                    "additionalPrice": 12,
+                                    "attributeId": 3,
+                                    "attributeName": "filling",
+                                    "attributeNameAr": "الحشوة"
+                                },
+                                {
+                                    "id": 50,
+                                    "itemVariationId": 59,
+                                    "name": "hello",
+                                    "nameAr": null,
+                                    "note": "note",
+                                    "noteAr": null,
+                                    "additionalPrice": 12,
+                                    "attributeId": 3,
+                                    "attributeName": "filling",
+                                    "attributeNameAr": "الحشوة"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 6,
+                            "name": "cheese type",
+                            "nameAr": "??? ?????",
+                            "variations": [
+                                {
+                                    "id": 46,
+                                    "itemVariationId": 67,
+                                    "name": "Mozzarella Cheese",
+                                    "nameAr": "جبن موزاريلا",
+                                    "note": "string",
+                                    "noteAr": null,
+                                    "additionalPrice": 5,
+                                    "attributeId": 6,
+                                    "attributeName": "cheese type",
+                                    "attributeNameAr": "??? ?????"
+                                },
+                                {
+                                    "id": 47,
+                                    "itemVariationId": 68,
+                                    "name": "Cheddar Cheese",
+                                    "nameAr": "جبن شيدر",
+                                    "note": "string",
+                                    "noteAr": null,
+                                    "additionalPrice": 10,
+                                    "attributeId": 6,
+                                    "attributeName": "cheese type",
+                                    "attributeNameAr": "??? ?????"
+                                },
+                                {
+                                    "id": 48,
+                                    "itemVariationId": 69,
+                                    "name": "Ricotta Cheese",
+                                    "nameAr": "جبن ريكوتا",
+                                    "note": "",
+                                    "noteAr": null,
+                                    "additionalPrice": 12,
+                                    "attributeId": 6,
+                                    "attributeName": "cheese type",
+                                    "attributeNameAr": "??? ?????"
+                                }
+                            ]
+                        }
+                    ],
+                    "itemAddons": [
+                        {
+                            "addonId": 103,
+                            "addonName": "Italian spaghetti",
+                            "addonNameAr": null,
+                            "additionalPrice": 50,
+                            "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747823482/pm4xhauun7ehe61je1mn.jpg"
+                        },
+                        {
+                            "addonId": 147,
+                            "addonName": "Chicken Popcorn Bites",
+                            "addonNameAr": "ميني بان كيك مشكل",
+                            "additionalPrice": 95.06,
+                            "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164208/sjwklptcgoaoepqemco6.jpg"
+                        },
+                        {
+                            "addonId": 104,
+                            "addonName": "BBQ Bacon Pasta",
+                            "addonNameAr": null,
+                            "additionalPrice": 50,
+                            "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg"
+                        },
+                        {
+                            "addonId": 144,
+                            "addonName": "Egg & Cheese Croissant",
+                            "addonNameAr": "وافل نوتيلا مع لوتس",
+                            "additionalPrice": 25.42,
+                            "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164071/ewlkn5jsveimpk6jxyrt.jpg"
+                        },
+                        {
+                            "addonId": 176,
+                            "addonName": "ura maki",
+                            "addonNameAr": null,
+                            "additionalPrice": 20,
+                            "imageUrl": "null"
+                        }
+                    ]
+                },
+                "DataJWT": "ExUAAB+LCAAAAAAAAAAAAAA....",
+                "Count": 1
+            },
+            "header": {
+                "success": true,
+                "code": 200,
+                "message": "تم تنفيذ العملية بنجاح",
+                "messageEn": "The operation was performed successfully",
+                "hasArabicContent": true,
+                "hasEnglishContent": true,
+                "customMessage": null,
+                "customMessageEn": null,
+                "transType": "success",
+                "duration": null,
+                "errors": null
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            output: null,
+            header: {
+                success: false,
+                code: 500,
+                message: "حدث خطأ بالخادم",
+                messageEn: "Server error"
+            }
+        });
+    }
+};
+
+
 
 export const createExtra = async (req, res, next) => {
     try {
