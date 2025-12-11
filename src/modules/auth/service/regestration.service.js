@@ -2057,7 +2057,246 @@ export const getAllFAQs = async (req, res) => {
 
 
 
+// GET /Item/PopularItems/:branchId
+export const PopularItems = async (req, res) => {
+    try {
+        const { branchId } = req.params;
 
+        if (!branchId || isNaN(branchId)) {
+            return res.status(400).json({
+                output: null,
+                header: {
+                    success: false,
+                    code: 400,
+                    message: "branchId غير صالح",
+                    messageEn: "Invalid branchId",
+                }
+            });
+        }
+
+        // الريسونس الثابت المطلوب
+        const response = {
+            "output": {
+                "Data": [
+                    {
+                        "id": 102,
+                        "name": "Pasta",
+                        "nameAr": null,
+                        "description": "descripttion",
+                        "descriptionAr": null,
+                        "price": 67,
+                        "pre_Price": 60,
+                        "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1765286438/syqjcpfudqrxx0tqnpvn.jpg",
+                        "status": 1,
+                        "isPointsOptionActive": true,
+                        "taxValue": null,
+                        "taxId": 1,
+                        "note": "4",
+                        "itemType": 1,
+                        "isFeatured": true,
+                        "isPopularActive": true,
+                        "categoryId": 5,
+                        "categoryName": "Pasta",
+                        "categoryNameAr": "باستا",
+                        "offerId": null,
+                        "isItemHasValidPopularDiscount": null,
+                        "isAvilable": null,
+                        "branchIds": [1, 3],
+                        "itemExtras": [
+                            {
+                                "id": 14,
+                                "itemExtraId": 49,
+                                "name": "Extra Meat",
+                                "nameAr": "لحم إضافي",
+                                "status": 1,
+                                "additionalPrice": 5555555
+                            },
+                            {
+                                "id": 47,
+                                "itemExtraId": 50,
+                                "name": "Sweet Potato Fries",
+                                "nameAr": "بطاطس حلوة مقلية",
+                                "status": 1,
+                                "additionalPrice": 7
+                            }
+                        ],
+                        "attributes": [
+                            {
+                                "id": 1,
+                                "name": "Size",
+                                "nameAr": "الحجم",
+                                "variations": [
+                                    {
+                                        "id": 3,
+                                        "itemVariationId": 52,
+                                        "name": "Small",
+                                        "nameAr": "صغير",
+                                        "note": null,
+                                        "noteAr": null,
+                                        "additionalPrice": 50,
+                                        "attributeId": 1,
+                                        "attributeName": "Size",
+                                        "attributeNameAr": "الحجم"
+                                    },
+                                    {
+                                        "id": 1,
+                                        "itemVariationId": 56,
+                                        "name": "Larg",
+                                        "nameAr": "كبير",
+                                        "note": null,
+                                        "noteAr": null,
+                                        "additionalPrice": 60,
+                                        "attributeId": 1,
+                                        "attributeName": "Size",
+                                        "attributeNameAr": "الحجم"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "itemVariationId": 60,
+                                        "name": "Medium",
+                                        "nameAr": "متوسط",
+                                        "note": null,
+                                        "noteAr": null,
+                                        "additionalPrice": 40,
+                                        "attributeId": 1,
+                                        "attributeName": "Size",
+                                        "attributeNameAr": "الحجم"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "name": "filling",
+                                "nameAr": "الحشوة",
+                                "variations": [
+                                    {
+                                        "id": 49,
+                                        "itemVariationId": 58,
+                                        "name": "new",
+                                        "nameAr": null,
+                                        "note": "",
+                                        "noteAr": null,
+                                        "additionalPrice": 12,
+                                        "attributeId": 3,
+                                        "attributeName": "filling",
+                                        "attributeNameAr": "الحشوة"
+                                    },
+                                    {
+                                        "id": 50,
+                                        "itemVariationId": 59,
+                                        "name": "hello",
+                                        "nameAr": null,
+                                        "note": "note",
+                                        "noteAr": null,
+                                        "additionalPrice": 12,
+                                        "attributeId": 3,
+                                        "attributeName": "filling",
+                                        "attributeNameAr": "الحشوة"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 6,
+                                "name": "cheese type",
+                                "nameAr": "نوع الجبن",
+                                "variations": [
+                                    {
+                                        "id": 46,
+                                        "itemVariationId": 67,
+                                        "name": "Mozzarella Cheese",
+                                        "nameAr": "جبن موزاريلا",
+                                        "note": "string",
+                                        "noteAr": null,
+                                        "additionalPrice": 5,
+                                        "attributeId": 6,
+                                        "attributeName": "cheese type",
+                                        "attributeNameAr": "نوع الجبن"
+                                    },
+                                    {
+                                        "id": 47,
+                                        "itemVariationId": 68,
+                                        "name": "Cheddar Cheese",
+                                        "nameAr": "جبن شيدر",
+                                        "note": "string",
+                                        "noteAr": null,
+                                        "additionalPrice": 10,
+                                        "attributeId": 6,
+                                        "attributeName": "cheese type",
+                                        "attributeNameAr": "نوع الجبن"
+                                    },
+                                    {
+                                        "id": 48,
+                                        "itemVariationId": 69,
+                                        "name": "Ricotta Cheese",
+                                        "nameAr": "جبن ريكوتا",
+                                        "note": "",
+                                        "noteAr": null,
+                                        "additionalPrice": 12,
+                                        "attributeId": 6,
+                                        "attributeName": "cheese type",
+                                        "attributeNameAr": "نوع الجبن"
+                                    }
+                                ]
+                            }
+                        ],
+                        "itemAddons": [
+                            {
+                                "addonId": 103,
+                                "addonName": "Italian spaghetti",
+                                "addonNameAr": null,
+                                "additionalPrice": 50,
+                                "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1747823482/pm4xhauun7ehe61je1mn.jpg"
+                            },
+                            {
+                                "addonId": 104,
+                                "addonName": "BBQ Bacon Pasta",
+                                "addonNameAr": null,
+                                "additionalPrice": 50,
+                                "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1745835974/krfiqnsw8nufytq4kkbu.jpg"
+                            },
+                            {
+                                "addonId": 144,
+                                "addonName": "Egg & Cheese Croissant",
+                                "addonNameAr": "وافل نوتيلا مع لوتس",
+                                "additionalPrice": 25.42,
+                                "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164071/ewlkn5jsveimpk6jxyrt.jpg"
+                            },
+                            {
+                                "addonId": 147,
+                                "addonName": "Chicken Popcorn Bites",
+                                "addonNameAr": "ميني بان كيك مشكل",
+                                "additionalPrice": 95.06,
+                                "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748164208/sjwklptcgoaoepqemco6.jpg"
+                            },
+                            {
+                                "addonId": 176,
+                                "addonName": "ura maki",
+                                "addonNameAr": null,
+                                "additionalPrice": 20,
+                                "imageUrl": "null"
+                            }
+                        ]
+                    }
+                ],
+
+                "DataJWT": "yFoAAB+LCAAAAAAAAArtXGl3otzS/UXvXQyap/0YBxBasJ2YvjxLwAgKxMQJ+..."
+            }
+        };
+
+        return res.status(200).json(response);
+
+    } catch (error) {
+        return res.status(500).json({
+            header: {
+                success: false,
+                code: 500,
+                message: "خطأ في السيرفر",
+                messageEn: "Server error"
+            },
+            output: null
+        });
+    }
+};
 
 
 export const CreateCustomerOrder = async (req, res) => {
@@ -2156,163 +2395,105 @@ export const CreateCustomerOrder = async (req, res) => {
 // GET Customer Order by ID (with authentication)
 export const GetCustomerOrder = async (req, res) => {
     try {
-        const userId = req.user.id; // موجود من الميدل وير
-        const { orderId } = req.query;
-
-        if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).json({
-                output: null,
-                header: {
-                    success: false,
-                    code: 400,
-                    message: "orderId غير صالح أو مفقود",
-                    messageEn: "Invalid or missing orderId",
-                    hasArabicContent: true,
-                    hasEnglishContent: true,
-                    transType: "danger",
-                    errors: null
-                }
-            });
-        }
-
-        // جلب الطلب فقط إذا كان من نفس المستخدم
-        const order = await OrderModelll.findOne({ _id: orderId, createdBy: userId })
-            .populate("branchId")
-            .lean();
-
-        if (!order) {
-            return res.status(200).json({
-                output: {
-                    Data: [],
-                    DataJWT: null,
-                    Count: 0
-                },
-                header: {
-                    success: false,
-                    code: 200,
-                    message: "اسم المستخدم المدخل غير موجود",
-                    messageEn: "The username entered does not exist",
-                    hasArabicContent: true,
-                    hasEnglishContent: true,
-                    transType: "danger",
-                    errors: null
-                }
-            });
-        }
-
-        // Customer data من التوكن
-        const customer = {
-            id: userId,
-            name: req.user.name || "User",
-            phone: order.phoneNumber,
-            email: req.user.email || ""
-        };
-
-        // Dummy order items (مثل السابق)
-        const orderItems = [
-            {
-                id: 134,
-                itemId: 127,
-                name: "Iced Caramel Latte",
-                description: "Description for Drinks Item 2",
-                imageUrl: "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748163160/drev6muucutsh1tp9rrw.jpg",
-                quantity: 1,
-                price: 10,
-                totalPrice: 20,
-                notes: "",
-                selectedVariations: [
-                    {
-                        id: 128,
-                        variationName: "Medium Size",
-                        attributename: "size",
-                        additionalPrice: 10
-                    }
-                ],
-                selectedAddons: [],
-                selectedExtras: []
-            }
-        ];
-
-        const responseData = {
-            id: order._id,
-            status: "Returned",
-            orderType: order.orderType,
-            paymentMethod: order.paymentMethod,
-            paymentStatus: order.paymentStatus,
-            branchId: order.branchId?.id || null,
-            branchName: order.branchId?.name || "",
-            address: order.address,
-            longitude: order.longitude,
-            latitude: order.latitude,
-            numberOfPersons: order.numberOfPersons,
-            dateTime: order.dateTime,
-            carType: order.carType || "",
-            carNumber: order.carNumber || "",
-            carColor: order.carColor || "",
-            phoneNumber: order.phoneNumber,
-            customerId: customer.id,
-            customerName: customer.name,
-            customerPhone: customer.phone,
-            customerEmail: customer.email,
-            createdBy: customer.name,
-            updatedBy: "ibrahem",
-            dateCreated: new Date().toLocaleString(),
-            dateUpdated: new Date().toLocaleString(),
-            discount: 0,
-            totalAmount: 10,
-            note: "Deliver to front door, no contact preferred",
-            orderItems,
-            orderItemsCount: orderItems.length,
-            discountType: "",
-            subTotal: 10,
-            deliveryBoyId: null,
-            deliveryBoyName: "",
-            deliveryPartnerId: null,
-            deliveryPartnerName: "",
-            deliveryPartnerPrice: 0,
-            externalOrderNO: null,
-            discountCode: null,
-            totalTaxes: null,
-            totalCharges: null,
-            totalDiscount: null,
-            pickup_Datetime: null,
-            delivery_Datetime: null,
-            orderScheduled: null
-        };
-
         return res.status(200).json({
-            header: {
-                success: true,
-                code: 200,
-                message: "تم تنفيذ العملية بنجاح",
-                messageEn: "The operation was performed successfully",
-                hasArabicContent: true,
-                hasEnglishContent: true,
-                transType: "success",
-                errors: null
+            "header": {
+                "success": true,
+                "code": 200,
+                "message": "تم تنفيذ العملية بنجاح",
+                "messageEn": "The operation was performed successfully",
+                "hasArabicContent": true,
+                "hasEnglishContent": true,
+                "customMessage": null,
+                "customMessageEn": null,
+                "transType": "success",
+                "duration": null,
+                "errors": null
             },
-            output: {
-                Data: responseData
+            "output": {
+                "Data": {
+                    "id": 113,
+                    "status": "Returned",
+                    "orderType": "Delivery",
+                    "paymentMethod": "CashOnDelivery",
+                    "paymentStatus": "UnPaid",
+                    "branchId": 1,
+                    "branchName": "Central Branch",
+                    "address": "No title",
+                    "longitude": -122.08399984985589,
+                    "latitude": 37.42199818917919,
+                    "numberOfPersons": 0,
+                    "dateTime": "2025-05-31T11:08:40.058",
+                    "carType": "",
+                    "carNumber": "",
+                    "carColor": "",
+                    "phoneNumber": "01002277772",
+                    "customerId": "d9e6b6cc-4be7-4d09-a55d-7abbe8f27488",
+                    "customerName": "Ahmed",
+                    "customerPhone": "01002277772",
+                    "customerEmail": "usf@gmail.com",
+                    "createdBy": "Ahmed",
+                    "updatedBy": "ibrahem",
+                    "dateCreated": "2025-07-11 01:43 PM",
+                    "dateUpdated": "7/11/2025 1:51:49 PM +00:00",
+                    "discount": 0,
+                    "totalAmount": 10,
+                    "note": "Deliver to front door, no contact preferred",
+                    "orderItems": [
+                        {
+                            "id": 134,
+                            "itemId": 127,
+                            "name": "Iced Caramel Latte",
+                            "description": "Description for Drinks Item 2",
+                            "imageUrl": "https://res.cloudinary.com/dfoypwbc1/image/upload/v1748163160/drev6muucutsh1tp9rrw.jpg",
+                            "quantity": 1,
+                            "price": 10,
+                            "totalPrice": 20,
+                            "notes": "",
+                            "selectedVariations": [
+                                {
+                                    "id": 128,
+                                    "variationName": "Medium Size",
+                                    "attributename": "size",
+                                    "additionalPrice": 10
+                                }
+                            ],
+                            "selectedAddons": [],
+                            "selectedExtras": []
+                        }
+                    ],
+                    "orderItemsCount": 1,
+                    "discountType": "",
+                    "subTotal": 10,
+                    "deliveryBoyId": null,
+                    "deliveryBoyName": "",
+                    "deliveryPartnerId": null,
+                    "deliveryPartnerName": "",
+                    "deliveryPartnerPrice": 0,
+                    "externalOrderNO": null,
+                    "discountCode": null,
+                    "totalTaxes": null,
+                    "totalCharges": null,
+                    "totalDiscount": null,
+                    "pickup_Datetime": null,
+                    "delivery_Datetime": null,
+                    "orderScheduled": null
+                }
             }
         });
 
     } catch (error) {
-        console.error("❌ GetCustomerOrder Error:", error);
         return res.status(500).json({
             header: {
                 success: false,
                 code: 500,
-                message: "حدث خطأ في السيرفر",
-                messageEn: "Server error",
-                hasArabicContent: true,
-                hasEnglishContent: true,
-                transType: "danger",
-                errors: error.message
+                message: "حدث خطأ بالخادم",
+                messageEn: "Server error"
             },
             output: null
         });
     }
 };
+
 
 
 
