@@ -524,11 +524,15 @@ export const createCategory = asyncHandelr(async (req, res, next) => {
     });
 });
 
-
-export const AddAddressToUser = async (req, res) => {
+export const AddAddress = async (req, res) => {
     try {
+        // 🔥 userId من التوكن
+        const userId = req.user?.id;
+
         const {
-            userId,
+            title,
+            longitude,
+            latitude,
             buildingName,
             street,
             apartmentNumber,
@@ -539,7 +543,7 @@ export const AddAddressToUser = async (req, res) => {
             addressType
         } = req.body;
 
-        // التحقق من وجود userId
+        // التحقق من وجود userId من التوكن
         if (!userId) {
             return res.status(400).json({
                 output: {
@@ -550,8 +554,8 @@ export const AddAddressToUser = async (req, res) => {
                 header: {
                     success: false,
                     code: 400,
-                    message: "userId مطلوب",
-                    messageEn: "userId is required",
+                    message: "userId غير موجود في التوكن",
+                    messageEn: "userId not found in token",
                     hasArabicContent: true,
                     hasEnglishContent: true,
                     customMessage: null,
@@ -563,7 +567,7 @@ export const AddAddressToUser = async (req, res) => {
             });
         }
 
-        // 🔍 التأكد من أن المستخدم موجود
+        // التأكد من أن المستخدم موجود
         const user = await Usermodel.findById(userId);
         if (!user) {
             return res.status(200).json({
@@ -588,9 +592,12 @@ export const AddAddressToUser = async (req, res) => {
             });
         }
 
-        // 📌 إنشاء العنوان
+        // إنشاء العنوان الجديد
         const address = await Address.create({
             userId,
+            title,
+            longitude,
+            latitude,
             buildingName,
             street,
             apartmentNumber,
@@ -601,20 +608,33 @@ export const AddAddressToUser = async (req, res) => {
             addressType
         });
 
-        // 🎯 توليد توكن نفس اللي في confirmPhoneOtp
+        // توليد توكن
         const access_Token = generatetoken({ payload: { id: user._id } });
 
         return res.status(200).json({
             output: {
-                Data: [address],
+                Data: {
+                    id: address._id,
+                    title: address.title,
+                    longitude: address.longitude,
+                    latitude: address.latitude,
+                    buildingName: address.buildingName,
+                    street: address.street,
+                    apartmentNumber: address.apartmentNumber,
+                    additionalDirection: address.additionalDirection,
+                    phoneNumber: address.phoneNumber,
+                    floor: address.floor,
+                    addressLabel: address.addressLabel,
+                    addressType: address.addressType
+                },
                 DataJWT: access_Token,
                 Count: 1
             },
             header: {
                 success: true,
                 code: 200,
-                message: "تم إضافة العنوان بنجاح",
-                messageEn: "Address added successfully",
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
                 hasArabicContent: true,
                 hasEnglishContent: true,
                 customMessage: null,
@@ -626,7 +646,7 @@ export const AddAddressToUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ AddAddressToUser Error:", error);
+        console.error("❌ AddAddress Error:", error);
 
         return res.status(500).json({
             output: {
@@ -651,12 +671,22 @@ export const AddAddressToUser = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
+
+
+
 export const GetUserAddress = async (req, res) => {
     try {
-        const { AddressId, UserId } = req.query;
+        // 🟢 احصل على userId من التوكن فقط
+        const userId = req.user?.id;
 
-        // ❗ التحقق من وجود بارامترات
-        if (!AddressId && !UserId) {
+        // لو التوكن مفيهوش userId
+        if (!userId) {
             return res.status(400).json({
                 output: {
                     Data: [],
@@ -666,8 +696,8 @@ export const GetUserAddress = async (req, res) => {
                 header: {
                     success: false,
                     code: 400,
-                    message: "يجب إرسال AddressId أو UserId",
-                    messageEn: "AddressId or UserId is required",
+                    message: "userId غير موجود في التوكن",
+                    messageEn: "Token userId is missing",
                     hasArabicContent: true,
                     hasEnglishContent: true,
                     customMessage: null,
@@ -679,78 +709,62 @@ export const GetUserAddress = async (req, res) => {
             });
         }
 
-        let addresses;
-
-        // 1️⃣ لو AddressId موجود → رجّع العنوان المحدد
-        if (AddressId) {
-            addresses = await Address.find({ _id: AddressId });
-
-            if (addresses.length === 0) {
-                return res.status(200).json({
-                    output: {
-                        Data: [],
-                        DataJWT: null,
-                        Count: 0
-                    },
-                    header: {
-                        success: false,
-                        code: 200,
-                        message: "العنوان غير موجود",
-                        messageEn: "Address not found",
-                        hasArabicContent: true,
-                        hasEnglishContent: true,
-                        customMessage: null,
-                        customMessageEn: null,
-                        transType: "danger",
-                        duration: null,
-                        errors: null
-                    }
-                });
-            }
+        // 🟢 تأكد من المستخدم
+        const user = await Usermodel.findById(userId);
+        if (!user) {
+            return res.status(200).json({
+                output: {
+                    Data: { address: [] },
+                    DataJWT: null,
+                    Count: 0
+                },
+                header: {
+                    success: false,
+                    code: 200,
+                    message: "المستخدم غير موجود",
+                    messageEn: "User not found",
+                    hasArabicContent: true,
+                    hasEnglishContent: true,
+                    customMessage: null,
+                    customMessageEn: null,
+                    transType: "danger",
+                    duration: null,
+                    errors: null
+                }
+            });
         }
 
-        // 2️⃣ لو UserId موجود → رجّع عناوين المستخدم
-        else if (UserId) {
-            // تأكد المستخدم موجود
-            const user = await Usermodel.findById(UserId);
-            if (!user) {
-                return res.status(200).json({
-                    output: {
-                        Data: [],
-                        DataJWT: null,
-                        Count: 0
-                    },
-                    header: {
-                        success: false,
-                        code: 200,
-                        message: "اسم المستخدم المدخل غير موجود",
-                        messageEn: "The username entered does not exist",
-                        hasArabicContent: true,
-                        hasEnglishContent: true,
-                        customMessage: null,
-                        customMessageEn: null,
-                        transType: "danger",
-                        duration: null,
-                        errors: null
-                    }
-                });
-            }
+        // 🟢 رجّع كل عناوين المستخدم
+        const addresses = await Address.find({ userId });
 
-            addresses = await Address.find({ userId: UserId });
-        }
+        const formattedAddresses = addresses.map(a => ({
+            id: a._id,
+            title: a.title,
+            longitude: a.longitude,
+            latitude: a.latitude,
+            buildingName: a.buildingName,
+            street: a.street,
+            apartmentNumber: a.apartmentNumber,
+            additionalDirection: a.additionalDirection,
+            phoneNumber: a.phoneNumber,
+            floor: a.floor,
+            addressLabel: a.addressLabel,
+            addressType: a.addressType
+        }));
 
-        // 📌 Response النهائي
         return res.status(200).json({
             output: {
-                Data: addresses,
-                DataJWT: "FAKE_JWT_TOKEN_123456", // 🔥 بناءً على طلبك
-                Count: addresses.length
+                Data: {
+                    address: formattedAddresses
+                },
+                DataJWT: "rwUAAB+LCAAAAAA....", // ثابت
+                Count: formattedAddresses.length
             },
             header: {
                 success: true,
                 code: 200,
-                message: "تم جلب البيانات بنجاح",
-                messageEn: "Data fetched successfully",
+                message: "تم تنفيذ العملية بنجاح",
+                messageEn: "The operation was performed successfully",
                 hasArabicContent: true,
                 hasEnglishContent: true,
                 customMessage: null,
@@ -788,11 +802,23 @@ export const GetUserAddress = async (req, res) => {
 };
 
 
+
+
+
+
+
+
+
+
+
+
 export const UpdateUserAddress = async (req, res) => {
     try {
         const {
             id,
-            userId,
+            title,
+            longitude,
+            latitude,
             buildingName,
             street,
             apartmentNumber,
@@ -803,86 +829,65 @@ export const UpdateUserAddress = async (req, res) => {
             addressType
         } = req.body;
 
-        // 1️⃣ التحقق من الـ id و userId
-        if (!id || !userId) {
+        const tokenUserId = req.user?.id;
+
+        // 1️⃣ التحقق من id
+        if (!id) {
             return res.status(400).json({
-                output: {
-                    Data: [],
-                    DataJWT: null,
-                    Count: 0
-                },
+                output: { Data: [], DataJWT: null, Count: 0 },
                 header: {
                     success: false,
                     code: 400,
-                    message: "يجب إرسال id و userId",
-                    messageEn: "id and userId are required",
+                    message: "يجب إرسال id",
+                    messageEn: "id is required",
                     hasArabicContent: true,
                     hasEnglishContent: true,
-                    customMessage: null,
-                    customMessageEn: null,
-                    transType: "danger",
-                    duration: null,
-                    errors: null
+                    transType: "danger"
                 }
             });
         }
 
-        // 2️⃣ التأكد من أن المستخدم موجود
-        const user = await Usermodel.findById(userId);
-
+        // 2️⃣ تأكد من أن المستخدم موجود
+        const user = await Usermodel.findById(tokenUserId);
         if (!user) {
             return res.status(200).json({
-                output: {
-                    Data: [],
-                    DataJWT: null,
-                    Count: 0
-                },
+                output: { Data: [], DataJWT: null, Count: 0 },
                 header: {
                     success: false,
                     code: 200,
-                    message: "اسم المستخدم المدخل غير موجود",
-                    messageEn: "The username entered does not exist",
+                    message: "المستخدم غير موجود",
+                    messageEn: "User not found",
                     hasArabicContent: true,
                     hasEnglishContent: true,
-                    customMessage: null,
-                    customMessageEn: null,
-                    transType: "danger",
-                    duration: null,
-                    errors: null
+                    transType: "danger"
                 }
             });
         }
 
-        // 3️⃣ التأكد من أن العنوان موجود
-        const address = await Address.findById(id);
-
+        // 3️⃣ تأكد أن العنوان موجود وينتمي لنفس المستخدم
+        const address = await Address.findOne({ _id: id, userId: tokenUserId });
         if (!address) {
-            return res.status(200).json({
-                output: {
-                    Data: [],
-                    DataJWT: null,
-                    Count: 0
-                },
+            return res.status(404).json({
+                output: { Data: [], DataJWT: null, Count: 0 },
                 header: {
                     success: false,
-                    code: 200,
-                    message: "العنوان غير موجود",
-                    messageEn: "Address not found",
+                    code: 404,
+                    message: "العنوان غير موجود أو لا يتبع هذا المستخدم",
+                    messageEn: "Address not found or does not belong to this user",
                     hasArabicContent: true,
                     hasEnglishContent: true,
-                    customMessage: null,
-                    customMessageEn: null,
-                    transType: "danger",
-                    duration: null,
-                    errors: null
+                    transType: "danger"
                 }
             });
         }
 
-        // 4️⃣ التحديث
+        // 4️⃣ تحديث البيانات
         const updatedAddress = await Address.findByIdAndUpdate(
             id,
             {
+                title,
+                longitude,
+                latitude,
                 buildingName,
                 street,
                 apartmentNumber,
@@ -892,14 +897,15 @@ export const UpdateUserAddress = async (req, res) => {
                 addressLabel,
                 addressType
             },
-            { new: true } // رجع البيانات بعد التحديث
+            { new: true }
         );
 
-        // 5️⃣ Response النهائي
+        // 5️⃣ Response
         return res.status(200).json({
             output: {
                 Data: [updatedAddress],
-                DataJWT: "FAKE_JWT_654987", // ✔ بناءً على طلبك نرجع توكن وهمي
+                // توكن ثابت زي ما بنفس نظام API بتاعك
+                DataJWT: "rwUAAB+LCAAAAAA....",
                 Count: 1
             },
             header: {
@@ -909,11 +915,7 @@ export const UpdateUserAddress = async (req, res) => {
                 messageEn: "Address updated successfully",
                 hasArabicContent: true,
                 hasEnglishContent: true,
-                customMessage: null,
-                customMessageEn: null,
-                transType: "success",
-                duration: null,
-                errors: null
+                transType: "success"
             }
         });
 
@@ -921,11 +923,7 @@ export const UpdateUserAddress = async (req, res) => {
         console.error("❌ UpdateUserAddress Error:", error);
 
         return res.status(500).json({
-            output: {
-                Data: [],
-                DataJWT: null,
-                Count: 0
-            },
+            output: { Data: [], DataJWT: null, Count: 0 },
             header: {
                 success: false,
                 code: 500,
@@ -933,15 +931,25 @@ export const UpdateUserAddress = async (req, res) => {
                 messageEn: "Server error",
                 hasArabicContent: true,
                 hasEnglishContent: true,
-                customMessage: null,
-                customMessageEn: null,
                 transType: "danger",
-                duration: null,
                 errors: error.message
             }
         });
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

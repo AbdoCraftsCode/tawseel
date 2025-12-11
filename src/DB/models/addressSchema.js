@@ -6,6 +6,11 @@ const addressSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+
+    title: { type: String, required: true },
+    longitude: { type: Number, required: true },
+    latitude: { type: Number, required: true },
+
     buildingName: { type: String, required: true },
     street: { type: String, required: true },
     apartmentNumber: { type: String, default: "" },
@@ -13,10 +18,12 @@ const addressSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true },
     floor: { type: String, default: "" },
     addressLabel: { type: String, default: "" },
-    addressType: { type: Number, default: 0 } // 0=Home, 1=Work, etc.
+
+    addressType: { type: Number, default: 0 } // 0=Home, 1=Work...
 }, { timestamps: true });
 
 export const Address = mongoose.model("Address", addressSchema);
+
 
 
 // static const String createOrder = '$apiBaseUrl/Order/CreateCustomerOrder';
