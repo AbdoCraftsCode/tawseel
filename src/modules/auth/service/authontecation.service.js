@@ -878,31 +878,124 @@ export const confirEachOtp = asyncHandelr(async (req, res, next) => {
 
 
 
+// export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
+//     const { phone, otpCode } = req.body;
+
+//     // تحقق من البودي
+//     if (!phone || !otpCode) {
+//         return next(new Error("يرجى إدخال رقم الهاتف والكود", { cause: 400 }));
+//     }
+
+//     // ابحث عن المستخدم
+//     const user = await dbservice.findOne({
+//         model: Usermodel,
+//         filter: { phone }
+//     });
+
+//     if (!user) {
+//         return next(new Error("رقم الهاتف غير مسجل", { cause: 404 }));
+//     }
+
+//     // لو متأكد قبل كده
+//     // if (user.isConfirmed) {
+//     //     return successresponse(res, "رقم الهاتف تم تأكيده مسبقًا", 200, { user });
+//     // }
+
+//     try {
+//         // اتصال بـ API التحقق من OTP
+//         const response = await axios.post(
+//             "https://authentica1.p.rapidapi.com/api/v2/verify-otp",
+//             { phone, otp: otpCode },
+//             {
+//                 headers: {
+//                     "x-rapidapi-key": process.env.AUTHENTICA_API_KEY,
+//                     "x-rapidapi-host": "authentica1.p.rapidapi.com",
+//                     "Content-Type": "application/json",
+//                     "Accept": "application/json",
+//                 },
+//             }
+//         );
+
+//         console.log("AUTHENTICA response:", response.data);
+
+//         // التأكد من نجاح التحقق
+//         if (response.data?.status === true || response.data?.message === "OTP verified successfully") {
+
+//             // تحديث حالة التأكيد
+//             await dbservice.updateOne({
+//                 model: Usermodel,
+//                 filter: { _id: user._id },
+//                 data: { isConfirmed: true },
+//             });
+
+//             // إنشاء توكنات
+//             const access_Token = generatetoken({ payload: { id: user._id } });
+//             const refreshToken = generatetoken({
+//                 payload: { id: user._id },
+//                 expiresIn: "365d",
+//             });
+
+//             return res.status(200).json({
+//                 output: {
+//                     token: access_Token
+//                 }
+//             });
+
+
+//         } else {
+//             return next(new Error("كود التحقق غير صحيح", { cause: 400 }));
+//         }
+
+//     } catch (error) {
+//         console.error("AUTHENTICA Error:", error.response?.data || error.message);
+//         return next(new Error("فشل التحقق من OTP", { cause: 500 }));
+//     }
+// });
+
+
+
 export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
     const { phone, otpCode } = req.body;
 
-    // تحقق من البودي
     if (!phone || !otpCode) {
         return next(new Error("يرجى إدخال رقم الهاتف والكود", { cause: 400 }));
     }
 
-    // ابحث عن المستخدم
+    // جلب المستخدم (حتى لو مش موجود هنكمل عادي لأننا في وضع التست)
     const user = await dbservice.findOne({
         model: Usermodel,
         filter: { phone }
     });
 
+    // ==== وضع التست المؤقت ====
+    // لو الكود 1234 → نعدي أي رقم (مسجل أو لا) ونولد توكن
+    if (otpCode === "1234") {
+        // لو المستخدم موجود أصلاً نستخدم الـ _id بتاعه
+        // لو مش موجود نعمل يوزر جديد أو نستخدم أي id وهمي (حسب احتياجك)
+        const userId = user ? user._id : new mongoose.Types.ObjectId(); // أو أي طريقة تحبها
+
+        const access_Token = generatetoken({ payload: { id: userId } });
+        const refreshToken = generatetoken({
+            payload: { id: userId },
+            expiresIn: "365d",
+        });
+
+        // لو عايز تسجل اليوزر الجديد تلقائياً وقت التست ممكن تضيف الكود هنا
+        // await Usermodel.create({ phone, isConfirmed: true });
+
+        return res.status(200).json({
+            output: {
+                token: access_Token
+            }
+        });
+    }
+
+    // ==== الوضع العادي (لما ترجع تفتح الإرسال الحقيقي) ====
     if (!user) {
         return next(new Error("رقم الهاتف غير مسجل", { cause: 404 }));
     }
 
-    // لو متأكد قبل كده
-    // if (user.isConfirmed) {
-    //     return successresponse(res, "رقم الهاتف تم تأكيده مسبقًا", 200, { user });
-    // }
-
     try {
-        // اتصال بـ API التحقق من OTP
         const response = await axios.post(
             "https://authentica1.p.rapidapi.com/api/v2/verify-otp",
             { phone, otp: otpCode },
@@ -918,17 +1011,13 @@ export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
 
         console.log("AUTHENTICA response:", response.data);
 
-        // التأكد من نجاح التحقق
         if (response.data?.status === true || response.data?.message === "OTP verified successfully") {
-
-            // تحديث حالة التأكيد
             await dbservice.updateOne({
                 model: Usermodel,
                 filter: { _id: user._id },
                 data: { isConfirmed: true },
             });
 
-            // إنشاء توكنات
             const access_Token = generatetoken({ payload: { id: user._id } });
             const refreshToken = generatetoken({
                 payload: { id: user._id },
@@ -940,21 +1029,14 @@ export const confirmPhoneOtp = asyncHandelr(async (req, res, next) => {
                     token: access_Token
                 }
             });
-
-
         } else {
             return next(new Error("كود التحقق غير صحيح", { cause: 400 }));
         }
-
     } catch (error) {
         console.error("AUTHENTICA Error:", error.response?.data || error.message);
         return next(new Error("فشل التحقق من OTP", { cause: 500 }));
     }
 });
-
-
-
-
 
 
 export const GetOfferById = async (req, res) => {
